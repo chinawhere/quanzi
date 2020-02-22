@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_30_164932) do
+ActiveRecord::Schema.define(version: 2020_02_22_170056) do
 
   create_table "ad_images", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "title"
@@ -79,8 +79,10 @@ ActiveRecord::Schema.define(version: 2019_12_30_164932) do
     t.string "address_city"
     t.string "address_district"
     t.string "avatar"
+    t.string "wx_open_id", limit: 50
     t.index ["phone_number"], name: "index_users_on_phone_number"
     t.index ["wx_ma_id"], name: "index_users_on_wx_ma_id"
+    t.index ["wx_open_id"], name: "index_users_on_wx_open_id"
     t.index ["wx_union_id"], name: "index_users_on_wx_union_id"
   end
 

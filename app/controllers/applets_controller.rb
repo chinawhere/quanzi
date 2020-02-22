@@ -62,46 +62,36 @@ class AppletsController < ApplicationController
     Rails.logger.info "----#{Time.now.strftime("%F %T")}-----update_product_logger_params: #{request.inspect}"
     user_info = {}
     if request['openid'].present?
-      user = User.find_by_wx_ma_id(request['openid'])
-      user = User.find_by_wx_union_id(request['unionid']) if user.blank? and request['unionid'].present?
-      user_info.merge!(wx_union_id: request['unionid'], customerPhoneNumber: user.phone_number) if user.present?
-      if user.blank?
-        phone_number = Wx::MiniApplet.decryptData(request['session_key'], params)
-        if phone_number.present?
-          user = User.find_or_create_source_user(phone_number, 'weixin_applet', {wx_ma_id: request['openid']})
-          user.update(wx_ma_id: request['openid']) if user.wx_ma_id.blank?
-          user_info.merge!(customerPhoneNumber: user.phone_number) 
-        end
-      end
-      user_info.merge!(wx_mp_id: request['openid'])
-      user_info.merge!(wx_union_id: request['unionid']) if request['unionid'].present?
+      user = User.find_or_create_wx_user(request['openid'])
+      user_info.merge!(customerPhoneNumber: user.phone_number) if user.present? and user.phone_number.present?
+      user_info.merge!(wx_open_id: request['openid'])
     end
     render json: user_info
   end
 
   def user_info
     p params
-    user = User.where(phone_number: params[:customer_phone_number]).last
+    user = User.find_or_create_wx_user(params[:wx_open_id])
     
     render json: {userInfo: user.to_applet_list}
   end
 
   def crm_info
     p params
-    user = User.where(phone_number: params[:customer_phone_number]).last
+    user = User.find_or_create_wx_user(params[:wx_open_id])
     
     render json: {userInfo: user.to_applet_crm_list}
 
   end
 
   def load_customer_info
-    user = User.where(phone_number: params[:customer_phone_number]).last
+    user = User.find_or_create_wx_user(params[:wx_open_id])
     customer_info = {}
     render json: {userInfo: user.to_applet_list}
   end
 
   def save_user_info
-    user = User.where(phone_number: params[:customer_phone_number]).last
+    user = User.find_or_create_wx_user(params[:wx_open_id])
     user.update(user_params)
     render json: {userInfo: user.to_applet_list}
   end
@@ -112,7 +102,7 @@ class AppletsController < ApplicationController
   end
 
   def save_address
-    user = User.where(phone_number: params[:customer_phone_number]).last
+    user = User.find_or_create_wx_user(params[:wx_open_id])
     params[:user_id] = user.try(:id)
     address_attr = address_params
   
@@ -133,7 +123,7 @@ class AppletsController < ApplicationController
 
 
   def load_address_list(current_address = nil)
-    user = User.where(phone_number: params[:customer_phone_number]).last
+    user = User.find_or_create_wx_user(params[:wx_open_id])
     user_addresses = Address.for_user(user.id).order('id desc')
     address_hash = user_addresses.select{|item| item.gaode_lng.present?}.map{|item| item.to_cart_info}
     render json: {addresses: address_hash, current_address: current_address || address_hash[0]}
@@ -152,7 +142,7 @@ class AppletsController < ApplicationController
 
   def orders
     p params
-    user = User.where(phone_number: params[:customer_phone_number]).last
+    user = User.find_or_create_wx_user(params[:wx_open_id])
     if user.present?
       order_product_ids = []
       order_infos = []
@@ -230,6 +220,7 @@ class AppletsController < ApplicationController
     params.permit(
       :name,
       :avatar,
+      :phone_number,
       :address_province,
       :address_city,
       :address_district,
@@ -240,10 +231,10 @@ class AppletsController < ApplicationController
   def create_order
     p params
     order_info = params[:orderInfo]
-    user = User.where(phone_number: order_info[:customer_phone_number]).last
+    user = User.find_or_create_wx_user(params[:wx_open_id])
 
 
-    order_info[:wx_ma_id] = user.wx_ma_id
+    order_info[:wx_open_id] = user.wx_open_id
     order_attr = base_order_params
 
     p order_attr
@@ -263,7 +254,7 @@ class AppletsController < ApplicationController
     option[:user] = user if user.present?
 
     option[:methods] = %w(check_user create_order  save_with_new_external_id create_tenpay_order_payment_record)
-    option[:redis_expire_name] = "applet-#{order_info[:wx_ma_id]}"
+    option[:redis_expire_name] = "applet-#{order_info[:wx_open_id]}"
 
     p option
     @order, success, errors = Order.create_or_update_order(option)
@@ -282,10 +273,10 @@ class AppletsController < ApplicationController
   def create_service_order
     p params
     order_info = params[:orderInfo]
-    user = User.where(phone_number: order_info[:customer_phone_number]).last
+    user = User.find_or_create_wx_user(params[:wx_open_id])
 
 
-    order_info[:wx_ma_id] = user.wx_ma_id
+    order_info[:wx_open_id] = user.wx_open_id
     order_attr = base_order_params
 
     p order_attr
@@ -302,7 +293,7 @@ class AppletsController < ApplicationController
     option[:user] = user if user.present?
 
     option[:methods] = %w(check_user create_order save_with_new_external_id)
-    option[:redis_expire_name] = "applet-#{order_info[:wx_ma_id]}"
+    option[:redis_expire_name] = "applet-#{order_info[:wx_open_id]}"
     p option
     @order, success, errors = Order.create_or_update_order(option)
     if success
@@ -316,9 +307,9 @@ class AppletsController < ApplicationController
   def create_course_order
     p params
     order_info = params
-    user = User.where(phone_number: params[:customer_phone_number]).last
+    user = User.find_or_create_wx_user(params[:wx_open_id])
 
-    order_info[:wx_ma_id] = user.wx_ma_id
+    order_info[:wx_open_id] = user.wx_open_id
     order_attr = base_course_params
     order_attr.merge!(applet_course_base_info(order_info))
 
@@ -335,7 +326,7 @@ class AppletsController < ApplicationController
     else
       option[:methods] = %w(check_user create_order create_course_student save_with_new_external_id)
     end
-    option[:redis_expire_name] = "applet-#{order_info[:wx_ma_id]}"
+    option[:redis_expire_name] = "applet-#{order_info[:wx_open_id]}"
 
     p option
     @order, success, errors = Order.create_or_update_order(option)
@@ -349,7 +340,7 @@ class AppletsController < ApplicationController
   def applet_order_base_info(order_info)
     attrs = {
       status: "unpaid",
-      wx_open_id: order_info[:wx_ma_id],
+      wx_open_id: order_info[:wx_open_id],
       purchase_source: "美莉家小程序",
       order_type: 'Product'
     }

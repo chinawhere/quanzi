@@ -1,0 +1,44 @@
+!!!
+%html{lang: "zh-CN"}
+  %head
+    %meta{charset: "utf-8"}/
+    %meta{content: "text/html; charset=utf-8", "http-equiv" => "content-type"}/
+    %meta{content: "IE=edge,chrome=1", "http-equiv" => "X-UA-Compatible"}/
+    %title 小家订购管理后台
+    %meta{content: "", name: "description"}/
+    %meta{content: "width=device-width", name: "viewport"}/
+    = stylesheet_link_tag    "admin", media: "all"
+    = javascript_include_tag "admin"
+    = csrf_meta_tags
+
+  %body{role: 'document', style: 'align-items: normal;'}
+    %nav.navbar.navbar-dark.fixed-top.bg-dark.flex-md-nowrap.p-0.shadow
+      %a.navbar-brand.col-sm-3.col-md-2.mr-0{href: "#"} 小家订购
+      - if false
+        %input.form-control.form-control-dark.w-100{type: 'text', placeholder: "Search", "aria-label" => "Search"}
+      %ul.navbar-nav.px-3
+        %li.nav-item.text-nowrap.white-color
+          = @admin.try(:user_name)
+          |
+          = link_to '退出', admin_do_logout_path, method: :delete, class: "white-color"
+          - if @admin.present?
+            |
+            = link_to '修改密码', edit_admin_admin_path(@admin), class: "white-color"
+
+    %div{style: 'height: 50px;'}
+    .container-fluid
+      %nav.col-md-2.d-none.d-md-block.bg-light.sidebar
+        .sidebar-sticky
+          %ul.nav.flex-column
+            - if false
+              %li.nav-item
+                %a.nav-link
+                  //%span.fa.fa-user-o
+                  用户信息
+            %li.nav-item
+              = link_to '图片信息', admin_ad_images_path, class: "nav-link #{'active' if params[:controller] == 'admin/ad_images'}"
+            %li.nav-item
+              = link_to '用户信息', admin_users_path, class: "nav-link #{'active' if params[:controller] == 'admin/users'}"
+      .col-md-12.ml-sm-auto.col-lg-10.px-4{role: 'main'}
+        = yield
+    %footer#footer

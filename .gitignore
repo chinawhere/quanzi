@@ -33,3 +33,11 @@
 /yarn-error.log
 yarn-debug.log*
 .yarn-integrity
+
+.idea/*
+.DS_Store
+
+/config/database.yml
+# Ignore application configuration
+/config/application.yml
+yarn.lock

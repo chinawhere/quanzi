@@ -1,0 +1,32 @@
+!!!
+%html{lang: "zh-CN"}
+  %head
+    %meta{charset: "utf-8"}/
+    %meta{content: "text/html; charset=utf-8", "http-equiv" => "content-type"}/
+    %meta{content: "IE=edge,chrome=1", "http-equiv" => "X-UA-Compatible"}/
+    %title 小家订购
+    %meta{content: "", name: "description"}/
+    %meta{content: "width=device-width", name: "viewport"}/
+    = stylesheet_link_tag    "admin", media: "all"
+    = javascript_include_tag "admin"
+    = csrf_meta_tags
+
+  %body{role: 'document'}
+    %nav.navbar.navbar-dark.fixed-top.bg-dark.flex-md-nowrap.p-0.shadow
+      %a.navbar-brand.col-sm-3.col-md-2.mr-0{href: "#"} 小家订购
+
+    .container-fluid
+      .row
+        %main.col-md-12.ml-sm-auto.col-lg-12.px-4{role: 'main'}
+          - if false
+            .table-responsive
+              %h2{style: "text-align: center;"} 小家订购管理后台
+
+          = form_tag admin_do_login_path, method: 'post', class: "form-signin" do
+            .form-group
+              = text_field_tag :name, params[:name],class: 'form-control', placeholder: "用户名"
+            .form-group
+              = password_field_tag :password, params[:password],class: 'form-control', placeholder: "密码"
+            .form-group
+              = submit_tag '登录', class: 'btn btn-lg btn-primary btn-block'
+    %footer#footer

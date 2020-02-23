@@ -1,9 +1,16 @@
-class Tag < ApplicationRecord
-  belongs_to :admin
-  has_many :product_tag_assignments, :dependent => :delete_all
-  has_many :products, through: :product_tag_assignments
-  accepts_nested_attributes_for :product_tag_assignments, allow_destroy: true
-  scope :active, -> { where(active: true).order(:position) }
+class ProductTagAssignment < ActiveRecord::Base
+  belongs_to :tag
+  belongs_to :product
+  # validates_uniqueness_of :tag_id, scope: :product_id
+  # validates_presence_of :tag_id, :product_id
+
+
+  def set_top
+    self.class.transaction do
+      self.class.where(tag_id: self.tag_id).where.not(id: self.id).update_all('`position` = `position` + 1')
+      self.update(:position => 0)
+    end
+  end
 
   def up_serial(target_id)
     self.class.transaction do
@@ -23,11 +30,4 @@ class Tag < ApplicationRecord
     end
   end
 
-  def enable
-    self.update(active: true)
-  end
-
-  def disable
-    self.update(active: false)
-  end
 end

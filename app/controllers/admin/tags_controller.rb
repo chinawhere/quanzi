@@ -9,9 +9,11 @@ class Admin::TagsController < Admin::BaseController
 
   def new
     @item = @admin.tags.build
+    @current_products = @item.products
   end
   def create
     @item = @admin.tags.build(current_record_params)
+    @current_products = @item.products
     if @item.save
       redirect_to admin_tags_path
     else
@@ -21,6 +23,8 @@ class Admin::TagsController < Admin::BaseController
 
   def update
     @item = Tag.find(params[:id])
+    @current_products = @item.products
+    p current_record_params
     if @item.update_attributes(current_record_params)
       redirect_to admin_tags_path
     else
@@ -30,6 +34,7 @@ class Admin::TagsController < Admin::BaseController
 
   def edit
     @item = Tag.find(params[:id])
+    @current_products = @item.products
   end
 
   def destroy

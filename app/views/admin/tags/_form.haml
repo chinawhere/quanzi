@@ -1,19 +1,48 @@
-.col-md-6
-  = form_for @item, url: url do |f|
-    - if @item.errors.any?
+
+- if false
+  .col-md-6
+    = simple_form_for(@item, url: url) do |f|
+      - if @item.errors.any?
+        .form-group
+          %ul
+            - @item.errors.messages.each do |key,msg|
+              %li= msg.join(',')
+
       .form-group
-        %ul
-          - @item.errors.messages.each do |key,msg|
-            %li= msg.join(',')
-    .form-group
-      = f.label "名称"
-      = f.text_field :title, class: 'form-control'
+        = f.input :title, label: "名称"
 
-    .form-group
-      = f.label "是否启用"
-      = f.select :active, options_for_select({'是' => true, '否' => false}, @item.active), {}, class: 'form-control'
+      .form-group
+        = f.association :products, as: :check_boxes, label: "产品", label_method: :title
+      .form-group
+        = f.input :active, as: :boolean, label: "是否售卖"
 
-    = f.submit '保存', class: 'btn btn-success'
+      = f.button :submit, value: "保存", class: "btn btn-success"
+- else
+
+  .col-md-6
+    = form_for @item, url: url do |f|
+      - if @item.errors.any?
+        .form-group
+          %ul
+            - @item.errors.messages.each do |key,msg|
+              %li= msg.join(',')
+      .form-group
+        = f.label "名称"
+        = f.text_field :title, class: 'form-control'
+
+      .form-group
+        = f.label "包含产品"
+      .form-group
+        - @admin.products.each do |product|
+          = check_box_tag 'tag[product_ids][]', product.id, @current_products.include?(product)
+          %span= product.title
+          
+
+      .form-group
+        = f.label "是否启用"
+        = f.select :active, options_for_select({'是' => true, '否' => false}, @item.active), {}, class: 'form-control'
+
+      = f.submit '保存', class: 'btn btn-success'
 
 
 

@@ -1,22 +1,22 @@
 class Product < ActiveRecord::Base
+  belongs_to :admin
   has_many :product_images
-  scope :active, -> { where(active: true) }
-
+  scope :active, -> { where(active: true).order(:position) }
 
   def up_serial(target_id)
     self.class.transaction do
-      pre_image = self.class.find(target_id)
-      index = pre_image.position
-      self.class.where.not(id: self.id).where('`position` <= ? AND `position` >= ?', self.position, pre_image.position).update_all('`position` = `position` + 1')
+      pre_item = self.class.find(target_id)
+      index = pre_item.position
+      self.class.where(admin_id: self.admin_id).where.not(id: self.id).where('`position` <= ? AND `position` >= ?', self.position, pre_item.position).update_all('`position` = `position` + 1')
       self.update(:position => index)
     end
   end
 
   def down_serial(target_id)
     self.class.transaction do
-      next_image = self.class.find(target_id)
-      index = next_image.position
-      self.class.where.not(id: self.id).where('`position` >= ? AND `position` <= ?', self.position, next_image.position).update_all('`position` = `position` - 1')
+      next_item = self.class.find(target_id)
+      index = next_item.position
+      self.class.where(admin_id: self.admin_id).where.not(id: self.id).where('`position` >= ? AND `position` <= ?', self.position, next_item.position).update_all('`position` = `position` - 1')
       self.update(:position => index)
     end
   end

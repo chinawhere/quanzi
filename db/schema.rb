@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_02_23_114213) do
+ActiveRecord::Schema.define(version: 2020_02_23_142320) do
 
   create_table "ad_images", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "title"
@@ -89,6 +89,7 @@ ActiveRecord::Schema.define(version: 2020_02_23_114213) do
     t.boolean "active"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "min_count", default: 1
     t.index ["admin_id"], name: "index_products_on_admin_id"
   end
 
@@ -114,6 +115,7 @@ ActiveRecord::Schema.define(version: 2020_02_23_114213) do
     t.boolean "active", default: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.text "description"
     t.index ["admin_id", "active"], name: "index_stores_on_admin_id_and_active"
   end
 

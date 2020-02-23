@@ -37,9 +37,35 @@ Rails.application.routes.draw do
           put :enable
         end
       end
+
+      collection do
+        post :file_upload
+        put :file_upload
+        patch :file_upload
+        put :up_serial
+        put :down_serial
+      end
+      member do
+        put :disable
+        put :enable
+      end
     end
 
-    resources :tags
+    resources :stores
+
+    resources :tags do
+      collection do
+        post :file_upload
+        put :file_upload
+        patch :file_upload
+        put :up_serial
+        put :down_serial
+      end
+      member do
+        put :disable
+        put :enable
+      end
+    end
 
     resources :users
   end

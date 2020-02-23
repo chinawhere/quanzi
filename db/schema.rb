@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_02_22_170056) do
+ActiveRecord::Schema.define(version: 2020_02_23_114213) do
 
   create_table "ad_images", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "title"
@@ -52,6 +52,46 @@ ActiveRecord::Schema.define(version: 2020_02_22_170056) do
     t.index ["name"], name: "index_admins_on_name"
   end
 
+  create_table "product_images", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.integer "product_id"
+    t.string "mobile_image"
+    t.integer "position"
+    t.boolean "active"
+    t.index ["product_id"], name: "index_product_images_on_product_id"
+  end
+
+  create_table "product_store_assignments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.integer "store_id"
+    t.integer "product_id"
+    t.integer "position", default: 999
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["store_id", "product_id"], name: "index_product_store_assignments_on_store_id_and_product_id"
+  end
+
+  create_table "product_tag_assignments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.integer "tag_id"
+    t.integer "product_id"
+    t.integer "position", default: 999
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["product_id", "tag_id"], name: "index_product_tag_assignments_on_product_id_and_tag_id"
+  end
+
+  create_table "products", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.integer "admin_id"
+    t.float "price"
+    t.string "title"
+    t.text "description"
+    t.string "front_image"
+    t.string "detailed_image"
+    t.integer "position", default: 999
+    t.boolean "active"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["admin_id"], name: "index_products_on_admin_id"
+  end
+
   create_table "role_assignments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.integer "admin_id"
     t.integer "role_id"
@@ -64,6 +104,27 @@ ActiveRecord::Schema.define(version: 2020_02_22_170056) do
     t.string "name"
     t.text "description"
     t.index ["name"], name: "index_roles_on_name"
+  end
+
+  create_table "stores", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.integer "admin_id"
+    t.string "store_name"
+    t.string "avatar"
+    t.string "phone_number"
+    t.boolean "active", default: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["admin_id", "active"], name: "index_stores_on_admin_id_and_active"
+  end
+
+  create_table "tags", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+    t.integer "admin_id"
+    t.string "title"
+    t.integer "position", default: 999
+    t.boolean "active"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["admin_id", "active"], name: "index_tags_on_admin_id_and_active"
   end
 
   create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|

@@ -1,6 +1,7 @@
 class Admin < ActiveRecord::Base
   has_many :role_assignments
   has_many :roles, through: :role_assignments
+  has_many :tags
 
   # PASSWORD
   attr_accessor :password_confirmation

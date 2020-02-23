@@ -1,0 +1,5 @@
+%h3 修改标签
+
+= link_to '返回', admin_tags_path, class: "btn btn-secondary"
+
+= render partial: 'form', locals: {url: admin_tag_path(@item)}

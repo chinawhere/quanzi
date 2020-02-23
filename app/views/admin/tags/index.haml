@@ -1,0 +1,31 @@
+%h2 标签列表
+= search_form_for @q, url: admin_tags_path, html: {class: 'form-inline'} do |f|
+  .form-group
+    = f.search_field :title_cont, class: "form-control", placeholder: "名称"
+  = f.submit '查询', class: "btn btn-secondary"
+  = link_to '新建标签', new_admin_tag_path, class: "btn btn-success"
+
+%br
+%div
+  总数： 
+  = @items.total_count
+.table-responsive
+  %table.table.table-striped.table-sm
+    %thead
+      %tr
+        %th 名称
+        %th 是否启用
+        %th 操作
+    %tbody
+      - @items.each do |item|
+        %tr
+          %td= item.title
+          %td= active_chinese_name(item)
+          %td
+            = link_to '修改', edit_admin_tag_path(item)
+            |
+            = link_to '删除', admin_tag_path(item), :method => :delete, :data => { :confirm => '确定删除?' }
+  = paginate @items
+
+
+

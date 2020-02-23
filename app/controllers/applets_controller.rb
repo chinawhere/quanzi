@@ -3,39 +3,6 @@ class AppletsController < ApplicationController
 
   def index
     request_info = {}
-    request_info[:pages_slideshows] = AdImage.applet_home.map{|item| item.to_applet_list}
-    request_info[:services] = Service.applet_home.limit(4).map{|item| item.to_applet_list}
-    request_info[:courses] = Course.applet_home.limit(2).map{|item| item.to_applet_list}
-    request_info[:goods] = Good.applet_home.limit(8).map{|item| item.to_applet_list}
-    render json: request_info
-  end
-
-  def service_index
-    request_info = {}
-    request_info[:pages_slideshows] = AdImage.applet_service.map{|item| item.to_applet_list}
-    request_info[:services] = Service.applet_home.map{|item| item.to_applet_list}
-    render json: request_info
-  end
-
-  def course_index
-    request_info = {}
-    request_info[:pages_slideshows] = AdImage.applet_course.map{|item| item.to_applet_list}
-    request_info[:courses] = Course.applet_home.map{|item| item.to_applet_list}
-    render json: request_info
-  end
-
-  def good_index
-    request_info = {}
-    request_info[:pages_slideshows] = AdImage.applet_good.map{|item| item.to_applet_list}
-    request_info[:goods] = Good.applet_home.map{|item| item.to_applet_list}
-    render json: request_info
-  end
-
-  def home_show
-    request_info = {}
-    request_info[:home_introduces] = Introduce.applet_home.map{|item| item.to_applet_list}
-    request_info[:team_introduces] = Introduce.applet_team.map{|item| item.to_applet_list}
-    request_info[:teacher_introduces] = Teacher.applet_home.map{|item| item.to_applet_list}
     render json: request_info
   end
 
@@ -82,12 +49,6 @@ class AppletsController < ApplicationController
     
     render json: {userInfo: user.to_applet_crm_list}
 
-  end
-
-  def load_customer_info
-    user = User.find_or_create_wx_user(params[:wx_open_id])
-    customer_info = {}
-    render json: {userInfo: user.to_applet_list}
   end
 
   def save_user_info
@@ -139,24 +100,12 @@ class AppletsController < ApplicationController
     load_address_list
   end
 
-
   def orders
     p params
     user = User.find_or_create_wx_user(params[:wx_open_id])
     if user.present?
       order_product_ids = []
       order_infos = []
-      order_type = params[:order_type] || 'Service'
-      if params[:status].blank?
-        orders = user.orders.where(order_type: order_type).includes(:purchased_items).order('orders.id desc')
-      else
-        orders = user.orders.where(order_type: order_type, status: params[:status]).includes(:purchased_items).order('orders.id desc')
-      end
-      orders.each do |order|
-        info, product_ids = order.to_applet_order_list
-        order_infos << info
-        order_product_ids += product_ids
-      end
       products = Product.get_product_list_hash(order_product_ids.uniq)
       attr_info = {orders: order_infos, products: products}
       attr_info[:emptyPageNotice] = '暂无订单' if order_infos.blank?
@@ -165,7 +114,6 @@ class AppletsController < ApplicationController
       render json: {orders: [], products: {}, emptyPageNotice: '暂无订单'}
     end
   end
-
 
   def cancel_order
     order = Order.find(params[:order_id]) rescue nil
@@ -176,27 +124,6 @@ class AppletsController < ApplicationController
       render json: {success: false, errors: '订单信息错误'}
     end
   end
-
-  def check_order_status
-    order = Order.find(params[:order_id]) rescue nil
-    if order.blank?
-      success = false
-      errors = '付款失败，请致电客服热线4008-3-14159'
-    else
-      success, errors, new_status = order.check_applet_order_status
-    end
-    if success
-      weixin_option = order.weixin_pay_json('127.0.0.1', order.wx_open_id, {appid: ENV['WX_MINIAPPLET_APP_ID'], mch_id: ENV['WX_MCH_ID']})
-      if weixin_option.present?
-        render json: {success: true, weixin_option: weixin_option}
-      else
-        render json: {success: false, errors: '付款失败，请致电客服热线4008-3-14159'}
-      end
-    else
-      render json: {success: success, errors: errors, new_status: new_status}
-    end
-  end
-
 
   def address_params
     params.permit(
@@ -238,15 +165,13 @@ class AppletsController < ApplicationController
     order_attr = base_order_params
 
     p order_attr
-    order_attr.merge!(applet_good_base_info(order_info))
+    order_attr.merge!(applet_order_base_info(order_info))
 
     if order_info[:address_id].present?
       order_attr.merge!(Address.find(order_info[:address_id]).to_applet_order_info)
     end
 
     order_attr[:user_id] = user.id
-    order_attr[:city_name] = order_attr[:address_city]
-
     order_attr, purchased_items = get_purchased_items(order_attr, params[:cartProducts])
 
     option = {order_attr: order_attr.permit!, params: order_info}
@@ -259,79 +184,7 @@ class AppletsController < ApplicationController
     p option
     @order, success, errors = Order.create_or_update_order(option)
     if success
-      weixin_option = @order.weixin_pay_json('127.0.0.1', @order.wx_open_id, {appid: ENV['WX_MINIAPPLET_APP_ID'], mch_id: ENV['WX_MCH_ID']})
-      if weixin_option.present?
-        render json: {success: true, weixin_option: weixin_option}
-      else
-        render json: {success: true, errors: '订单创建成功， 前往订单页面继续付款'}
-      end
-    else
-      render json: {success: false, errors: errors.values[0]}
-    end
-  end
-
-  def create_service_order
-    p params
-    order_info = params[:orderInfo]
-    user = User.find_or_create_wx_user(params[:wx_open_id])
-
-
-    order_info[:wx_open_id] = user.wx_open_id
-    order_attr = base_order_params
-
-    p order_attr
-    order_attr.merge!(applet_service_base_info(order_info))
-
-    if order_info[:address_id].present?
-      order_attr.merge!(Address.find(order_info[:address_id]).to_applet_order_info)
-    end
-
-    order_attr[:user_id] = user.id
-    order_attr[:city_name] = order_attr[:address_city]
-    option = {order_attr: order_attr.permit!, params: order_info}
-    option[:purchased_items] = get_service_purchased_items(order_info)
-    option[:user] = user if user.present?
-
-    option[:methods] = %w(check_user create_order save_with_new_external_id)
-    option[:redis_expire_name] = "applet-#{order_info[:wx_open_id]}"
-    p option
-    @order, success, errors = Order.create_or_update_order(option)
-    if success
-      render json: {success: success, order: @order}
-    else
-      render json: {success: false, errors: errors.values[0]}
-    end
-    @order, success, errors = Order.create_or_update_order(option)
-  end
-
-  def create_course_order
-    p params
-    order_info = params
-    user = User.find_or_create_wx_user(params[:wx_open_id])
-
-    order_info[:wx_open_id] = user.wx_open_id
-    order_attr = base_course_params
-    order_attr.merge!(applet_course_base_info(order_info))
-
-    order_attr[:user_id] = user.id
-    order_attr[:city_name] = order_attr[:city_name]
-
-    option = {order_attr: order_attr.permit!, params: order_info}
-    option[:purchased_items] = get_course_purchased_items(order_info)
-    option[:user] = user if user.present?
-
-    course = Course.find(order_info[:course_id])
-    if course.create_tenpay
-      option[:methods] = %w(check_user create_order create_course_student save_with_new_external_id create_tenpay_order_payment_record)
-    else
-      option[:methods] = %w(check_user create_order create_course_student save_with_new_external_id)
-    end
-    option[:redis_expire_name] = "applet-#{order_info[:wx_open_id]}"
-
-    p option
-    @order, success, errors = Order.create_or_update_order(option)
-    if success
-      render json: {success: success, order: @order}
+      render json: {success: true, order_id: @order.id}
     else
       render json: {success: false, errors: errors.values[0]}
     end
@@ -341,45 +194,9 @@ class AppletsController < ApplicationController
     attrs = {
       status: "unpaid",
       wx_open_id: order_info[:wx_open_id],
-      purchase_source: "美莉家小程序",
-      order_type: 'Product'
+      purchase_source: "小家订购"
     }
-    if order_info[:referral_phone_number].present?
-      referral_user = User.where(phone_number: order_info[:referral_phone_number]).last
-      if referral_user.present?
-        attrs[:referral_phone_number] = referral_user.try(:phone_number)
-        attrs[:referral_name] = referral_user.try(:name)
-      elsif order_info[:wx_referral_phone_number].present?
-        wx_referral_user = User.where(phone_number: order_info[:wx_referral_phone_number]).last
-        if wx_referral_user.present?
-          attrs[:referral_phone_number] = wx_referral_user.try(:phone_number)
-          attrs[:referral_name] = wx_referral_user.try(:name)
-        end
-      end
-    end
     attrs
-  end
-
-  def applet_service_base_info(order_info)
-    info = applet_order_base_info(order_info)
-    info[:order_type] = 'Service'
-    info
-  end
-
-  def applet_course_base_info(order_info)
-    info = applet_order_base_info(order_info)
-    info[:address_province] = order_info[:address_province]
-    info[:address_city] = order_info[:address_city]
-    info[:address_district] = order_info[:address_district]
-    info[:order_type] = 'Course'
-    info
-  end
-
-  def applet_good_base_info(order_info)
-    info = applet_order_base_info(order_info)
-    info[:zhekou] = order_info[:zhekou] || 1
-    info[:order_type] = 'Product'
-    info
   end
 
   def get_purchased_items(order_attr, cart_products)
@@ -399,41 +216,13 @@ class AppletsController < ApplicationController
     [order_attr, items]
   end
 
-  def get_service_purchased_items(order_info)
-    return [] if order_info[:service_id].blank?
-    service = Service.find(order_info[:service_id])
-    [{product_id: service.id, quantity: order_info[:service_quantity] || 1}]
-  end
-
-  def get_course_purchased_items(order_info)
-    return [] if order_info[:course_id].blank?
-    course = Course.find(order_info[:course_id])
-    [{product_id: course.id, quantity: order_info[:course_quantity] || 1, price: course.price}]
-  end
-
-
   def base_order_params
     params.require(:orderInfo).permit(
       :customer_name,
       :customer_phone_number,
       :recipient_name,
-      :recipient_phone_number,
+      :recipient_phone_number,      
       :user_id
     )
   end
-
-  def base_course_params
-    params.permit(
-      :recipient_name,
-      :recipient_phone_number,
-      :customer_name,
-      :customer_phone_number,
-      :referral_name,
-      :referral_phone_number,
-      :city_name,
-      :applet_form_id,
-      :user_id
-    )
-  end
-
 end

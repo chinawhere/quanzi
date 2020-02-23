@@ -29,7 +29,7 @@
           %td= AdImage::AD_TYPE[item.ad_type]
           %td= item.url
           %td= image_tag(item.mobile_image, width: '100px')
-          %td= item.active
+          %td= active_chinese_name(item)
           %td
             = link_to '修改', edit_admin_ad_image_path(item)
             |

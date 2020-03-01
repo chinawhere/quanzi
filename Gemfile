@@ -48,7 +48,7 @@ gem 'kaminari'
 gem 'simple_form'
 
 gem 'qiniu'
-# gem 'jquery-fileupload-rails'
+gem 'jquery-fileupload-rails'
 
 # 微信支付
 gem 'wx_pay'

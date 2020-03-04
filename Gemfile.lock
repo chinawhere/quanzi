@@ -162,7 +162,7 @@ GEM
     polyamorous (2.3.2)
       activerecord (>= 5.2.1)
     public_suffix (4.0.3)
-    puma (3.12.2)
+    puma (3.12.4)
     qiniu (6.9.0)
       mime-types (~> 3.1)
       rest-client (~> 2.0)
@@ -300,7 +300,7 @@ DEPENDENCIES
   kaminari
   listen (>= 3.0.5, < 3.2)
   mysql2 (>= 0.3.18, < 0.4.9)
-  puma (~> 3.11)
+  puma (~> 3.12)
   qiniu
   rails (~> 6.0.0)
   ransack

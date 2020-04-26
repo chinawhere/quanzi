@@ -16,11 +16,12 @@ class User < ApplicationRecord
 
   def to_applet_crm_list
     attrs = {}
-    %w(name avatar).each do |info|
+    %w(name avatar admin_id).each do |info|
       attrs[info.to_sym] =  self.send(info)
     end
     attrs[:sex] = self.get_applet_sex
-    attrs[:orders_count] = 0
+    attrs[:user_id] = self.id
+    attrs[:stores_count] = 1
     attrs
   end
 

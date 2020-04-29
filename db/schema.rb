@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_26_154030) do
+ActiveRecord::Schema.define(version: 2020_04_29_151929) do
 
   create_table "ad_images", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.string "title"
@@ -61,12 +61,14 @@ ActiveRecord::Schema.define(version: 2020_04_26_154030) do
   end
 
   create_table "product_store_assignments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
-    t.integer "store_id"
+    t.integer "shop_id"
     t.integer "product_id"
     t.integer "position", default: 999
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["store_id", "product_id"], name: "index_product_store_assignments_on_store_id_and_product_id"
+    t.index ["product_id", "shop_id"], name: "index_product_store_assignments_on_product_id_and_shop_id"
+    t.index ["shop_id", "product_id"], name: "index_product_store_assignments_on_shop_id_and_product_id"
+    t.index ["shop_id"], name: "index_product_store_assignments_on_shop_id"
   end
 
   create_table "product_tag_assignments", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
@@ -107,16 +109,17 @@ ActiveRecord::Schema.define(version: 2020_04_26_154030) do
     t.index ["name"], name: "index_roles_on_name"
   end
 
-  create_table "stores", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
+  create_table "shops", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|
     t.integer "admin_id"
-    t.string "store_name"
+    t.string "shop_name"
     t.string "avatar"
     t.string "phone_number"
     t.boolean "active", default: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.text "description"
-    t.index ["admin_id", "active"], name: "index_stores_on_admin_id_and_active"
+    t.string "mobile_image"
+    t.index ["admin_id", "active"], name: "index_shops_on_admin_id_and_active"
   end
 
   create_table "tags", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8", force: :cascade do |t|

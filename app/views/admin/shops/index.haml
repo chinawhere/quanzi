@@ -1,9 +1,9 @@
 %h2 微信群列表
-= search_form_for @q, url: admin_stores_path, html: {class: 'form-inline'} do |f|
+= search_form_for @q, url: admin_shops_path, html: {class: 'form-inline'} do |f|
   .form-group
-    = f.search_field :store_name_cont, class: "form-control", placeholder: "名称"
+    = f.search_field :shop_name_cont, class: "form-control", placeholder: "名称"
   = f.submit '查询', class: "btn btn-secondary"
-  = link_to '新建微信群', new_admin_store_path, class: "btn btn-success"
+  = link_to '新建微信群', new_admin_shop_path, class: "btn btn-success"
 
 %br
 %div
@@ -15,16 +15,18 @@
       %tr
         %th 名称
         %th 联系电话
+        %th 手机图片
         %th 配送说明
         %th 是否启用
         %th 操作
     %tbody
       - @items.each do |item|
         %tr
-          %td= item.store_name
+          %td= item.shop_name
           %td= item.phone_number
+          %td= image_tag(item.mobile_image, width: '100px')
           %td= item.description
           %td= active_chinese_name(item)
           %td
-            = link_to '修改', edit_admin_store_path(item)
+            = link_to '修改', edit_admin_shop_path(item)
   = paginate @items

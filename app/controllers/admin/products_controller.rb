@@ -1,4 +1,3 @@
-
 class Admin::ProductsController < Admin::BaseController
   layout 'admin'
 

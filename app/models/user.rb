@@ -21,7 +21,7 @@ class User < ApplicationRecord
     end
     attrs[:sex] = self.get_applet_sex
     attrs[:user_id] = self.id
-    attrs[:stores_count] = 1
+    attrs[:shops_count] = 1
     attrs
   end
 

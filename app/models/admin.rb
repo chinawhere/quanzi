@@ -2,7 +2,7 @@ class Admin < ActiveRecord::Base
   has_many :role_assignments
   has_many :roles, through: :role_assignments
   has_many :products
-  has_many :stores
+  has_many :shops
   has_many :tags
 
   # PASSWORD

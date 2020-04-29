@@ -51,7 +51,13 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :stores
+    resources :shops do
+      collection do
+        post :file_upload
+        put :file_upload
+        patch :file_upload
+      end
+    end
 
     resources :tags do
       collection do

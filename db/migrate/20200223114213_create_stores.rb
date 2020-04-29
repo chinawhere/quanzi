@@ -56,7 +56,7 @@ class CreateStores < ActiveRecord::Migration[6.0]
       t.integer :position, default: 999
       t.timestamps
     end
-    add_index :product_store_assignments, [:store_id, :product_id]
+    #add_index :product_store_assignments, [:store_id, :product_id]
 
   end
 end

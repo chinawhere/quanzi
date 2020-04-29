@@ -91,9 +91,10 @@ Rails.application.routes.draw do
       get  :load_address_info
       get  :load_customer_info
       get  :product_show
-      get  :set_phone
       post :save_address
       post :save_user_info
+      get  :set_phone
+      get  :shops_list
       get  :user_info
     end
   end

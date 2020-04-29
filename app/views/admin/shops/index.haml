@@ -15,6 +15,7 @@
       %tr
         %th 名称
         %th 联系电话
+        %th 起订金额(元)
         %th 手机图片
         %th 配送说明
         %th 是否启用
@@ -24,7 +25,8 @@
         %tr
           %td= item.shop_name
           %td= item.phone_number
-          %td= image_tag(item.mobile_image, width: '100px')
+          %td= item.min_amount
+          %td= item.mobile_image ? image_tag(item.mobile_image, width: '100px') : ''
           %td= item.description
           %td= active_chinese_name(item)
           %td

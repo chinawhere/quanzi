@@ -6,6 +6,16 @@ class AppletsController < ApplicationController
     render json: request_info
   end
 
+  def shops_list
+    p params
+    if params[:admin_id]
+      item = Admin.find(params[:admin_id])
+    elsif params[:user_id]
+      item = User.find(params[:user_id])
+    end
+    render json: {shops: item.shops.active.map{|item| item.to_applet_list}}
+  end
+
   def cart_show
     product = Product.find(params[:id])
     request_info = {}

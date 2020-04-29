@@ -119,6 +119,7 @@ ActiveRecord::Schema.define(version: 2020_04_29_151929) do
     t.datetime "updated_at", precision: 6, null: false
     t.text "description"
     t.string "mobile_image"
+    t.float "min_amount"
     t.index ["admin_id", "active"], name: "index_shops_on_admin_id_and_active"
   end
 

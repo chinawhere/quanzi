@@ -14,8 +14,12 @@
       = f.text_field :phone_number, class: 'form-control'
 
     .form-group
+      = f.label "起订金额"
+      = f.text_field :min_amount, class: 'form-control'
+
+    .form-group
       = f.label "配送说明"
-      = f.text_field :description, class: 'form-control'
+      = f.text_area :description, class: 'form-control'
 
     .form-group
       = f.label "是否启用"
